@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+import tensorflow_hub as hub 
 import tensorflow as tf
 from keras.preprocessing import image
 from keras.models import load_model
@@ -11,8 +12,10 @@ import os
 import sys
 
 # Loading model
-model = load_model("F:/Quark/ML workshop/ML workshop project/vegetables.h5")
 
+print("Loading model!")
+
+print("Model loaded!")
 class_map = ['Bean', 'Bitter Gourd', 'Bottle Gourd', 'Brinjal', 'Broccoli', 'Cabbage', 'Capsicum', 'Carrot', 'Cauliflower', 'Cucumber', 'Papaya', 'Potato', 'Pumpkin', 'Radish', 'Tomato']
 
 # Preparing and pre-processing the image
@@ -36,7 +39,7 @@ def load_and_prep_image(img_path):
     # print(img)
     return img
 
-def pred_and_plot(filename, model = model):
+def pred_and_plot(filename):
   """
   Imports an image located at filename, makes a prediction on it with
   a trained model and plots the image with the predicted class as the title.
@@ -46,10 +49,12 @@ def pred_and_plot(filename, model = model):
   print("predict")
 
   # Make a prediction
+  model = load_model("F:/Quark/ML workshop/ML workshop project/model_1.h5", custom_objects = {'KerasLayer':hub.KerasLayer})
   pred = model.predict(tf.expand_dims(img, axis=0))
-
+  print("Pred mai pohch gaya!")
   # Get the predicted class
   pred_class = class_map[int(tf.round(pred)[0][0])]
+  print("pred_class")
 
   return pred_class
 # Instantiating flask app
