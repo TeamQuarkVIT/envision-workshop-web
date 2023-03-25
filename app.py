@@ -9,11 +9,8 @@ from werkzeug.utils import secure_filename
 import os
 import sys
 
-# Loading model
 
-print("Loading model!")
 
-print("Model loaded!")
 class_map = ['Bean', 'Bitter Gourd', 'Bottle Gourd', 'Brinjal', 'Broccoli', 'Cabbage', 'Capsicum', 'Carrot', 'Cauliflower', 'Cucumber', 'Papaya', 'Potato', 'Pumpkin', 'Radish', 'Tomato']
 
 # Preparing and pre-processing the image
@@ -46,16 +43,17 @@ def pred_and_plot(filename):
   img = load_and_prep_image(filename)
   print("predict")
 
-  # Make a prediction
+  # Loading model
   model = load_model("F:/Quark/ML workshop/ML workshop project/model_1.h5", custom_objects = {'KerasLayer':hub.KerasLayer})
+  
+  # Make a prediction
   pred = model.predict(tf.expand_dims(img, axis=0))
-  print(pred, file=sys.stderr)
+
   # Get the predicted class
-  print(int(tf.round(pred)[0][0]), file=sys.stderr)
-  pred_class = class_map[int(tf.round(pred)[0][0])-1]
-  print("pred_class")
+  pred_class = class_map[int(tf.round(pred)[0][0])-1] 
 
   return pred_class
+
 # Instantiating flask app
 app = Flask(__name__)
 
@@ -65,23 +63,19 @@ def main():
 
 @app.route('/prediction', methods=['GET', 'POST'])
 def predict_image_file():
-    # try:
+    try:
         if request.method == 'POST':
-            img = request.files['file']
-            # print(img, file=sys.stderr)            
-            basepath = os.path.dirname(os.path.abspath(__file__))
-            # print(basepath, file=sys.stderr)            
+            img = request.files['file']                    
+            basepath = os.path.dirname(os.path.abspath(__file__))                
             img_path = os.path.join(basepath, 'uploads', secure_filename(img.filename))
             img.save(img_path)
-            # print(img_path, file=sys.stderr)            
-            # print("Above Prediction", file=sys.stderr)
-            pred = pred_and_plot(img_path)
-            # print("Prediction: "+pred, file=sys.stderr)
+
+            pred = pred_and_plot(img_path)            
             return render_template("result.html", predictions=pred, img_path = img_path)
 
-    # except:
-    #     error = "File cannot be processed."
-    #     return render_template("result.html", err=error)
+    except:
+        error = "File cannot be processed."
+        return render_template("result.html", err=error)
 
 
 # Driver code
