@@ -6,8 +6,6 @@ from keras.models import load_model
 from keras.utils import img_to_array
 from keras.utils import load_img
 from werkzeug.utils import secure_filename
-import numpy as np
-from PIL import Image
 import os
 import sys
 
@@ -32,7 +30,7 @@ def load_and_prep_image(img_path):
     img = tf.image.decode_image(img, channels=3)
 
     # Resize the image (to the same size our model was trained on)
-    img = tf.image.resize(img, size = [150, 150])
+    img = tf.image.resize(img, size = [224, 224])
 
     # Rescale the image (get all values between 0 and 1)
     img = img/255.
@@ -51,9 +49,10 @@ def pred_and_plot(filename):
   # Make a prediction
   model = load_model("F:/Quark/ML workshop/ML workshop project/model_1.h5", custom_objects = {'KerasLayer':hub.KerasLayer})
   pred = model.predict(tf.expand_dims(img, axis=0))
-  print("Pred mai pohch gaya!")
+  print(pred, file=sys.stderr)
   # Get the predicted class
-  pred_class = class_map[int(tf.round(pred)[0][0])]
+  print(int(tf.round(pred)[0][0]), file=sys.stderr)
+  pred_class = class_map[int(tf.round(pred)[0][0])-1]
   print("pred_class")
 
   return pred_class
@@ -66,7 +65,7 @@ def main():
 
 @app.route('/prediction', methods=['GET', 'POST'])
 def predict_image_file():
-    try:
+    # try:
         if request.method == 'POST':
             img = request.files['file']
             # print(img, file=sys.stderr)            
@@ -80,9 +79,9 @@ def predict_image_file():
             # print("Prediction: "+pred, file=sys.stderr)
             return render_template("result.html", predictions=pred, img_path = img_path)
 
-    except:
-        error = "File cannot be processed."
-        return render_template("result.html", err=error)
+    # except:
+    #     error = "File cannot be processed."
+    #     return render_template("result.html", err=error)
 
 
 # Driver code
